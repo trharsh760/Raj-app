@@ -1,0 +1,232 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raj App - Live Cricket Exchange Pro</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        crexBg: '#131a24',
+                        crexCard: '#1e2636',
+                        crexGreen: '#00b055',
+                        crexGreenHover: '#009647',
+                        badgeRed: '#ff3b30',
+                        whatsappGreen: '#25D366'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-crexBg text-slate-100 font-sans pb-24" onload="fetchLiveMatches()">
+
+    <!-- Top Header -->
+    <header class="sticky top-0 z-50 bg-crexCard border-b border-slate-800 px-4 py-2.5 flex items-center justify-between shadow-md">
+        <div class="flex items-center space-x-2.5">
+            <div class="bg-crexGreen text-white px-2 py-1 rounded font-black text-sm tracking-wider shadow">
+                RAJ<span class="text-slate-900 ml-0.5">EX</span>
+            </div>
+            <div class="flex flex-col">
+                <span class="text-xs font-bold text-white tracking-wide">Live Cricket Exchange</span>
+                <span class="text-[9px] text-emerald-400 font-medium"><i class="fa-solid fa-circle text-[6px] mr-1 animate-pulse"></i> Live Synced</span>
+            </div>
+        </div>
+        <div class="flex items-center space-x-2.5">
+            <button onclick="fetchLiveMatches()" class="bg-slate-800/80 p-2 rounded-full text-slate-300 hover:text-white transition relative" title="Refresh Scores">
+                <i class="fa-solid fa-rotate text-xs"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Navigation Tabs -->
+    <div class="bg-crexCard border-b border-slate-800 px-2 flex justify-around text-xs font-semibold">
+        <button onclick="switchTab('matches')" id="tab-matches" class="py-2.5 px-4 text-crexGreen border-b-2 border-crexGreen transition">Matches</button>
+        <button onclick="switchTab('series')" id="tab-series" class="py-2.5 px-4 text-slate-400 hover:text-slate-200 transition">Series / Points Table</button>
+        <button onclick="switchTab('news')" id="tab-news" class="py-2.5 px-4 text-slate-400 hover:text-slate-200 transition">News & Tips</button>
+        <button onclick="switchTab('more')" id="tab-more" class="py-2.5 px-4 text-slate-400 hover:text-slate-200 transition">More</button>
+    </div>
+
+    <!-- Main Container -->
+    <main class="max-w-md mx-auto p-3.5 space-y-3">
+
+        <!-- ================= VIEW 1: MATCHES ================= -->
+        <div id="view-matches" class="space-y-3">
+
+            <!-- Filter Pills -->
+            <div class="sticky top-[52px] z-40 bg-crexBg/95 backdrop-blur py-1.5 flex space-x-2 overflow-x-auto scrollbar-none border-b border-slate-800/60">
+                <button onclick="filterMatches('all')" id="btn-all" class="filter-btn px-3 py-1 bg-crexGreen text-white text-xs font-bold rounded shadow whitespace-nowrap transition">All</button>
+                <button onclick="filterMatches('live')" id="btn-live" class="filter-btn px-3 py-1 bg-crexCard border border-slate-700/60 text-slate-300 text-xs font-medium rounded hover:bg-slate-800 whitespace-nowrap flex items-center transition">
+                    <span class="w-1.5 h-1.5 rounded-full bg-badgeRed mr-1.5"></span> Live Matches
+                </button>
+            </div>
+
+            <!-- WHATSAPP MATCH REPORT WIDGET -->
+            <div class="bg-gradient-to-br from-slate-900 via-crexCard to-slate-900 border border-whatsappGreen/40 rounded-lg p-3 shadow-lg relative">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-6 h-6 bg-whatsappGreen rounded-full flex items-center justify-center text-white text-xs shadow">
+                            <i class="fa-brands fa-whatsapp"></i>
+                        </div>
+                        <span class="font-bold text-xs text-white">Raj Personal Reports</span>
+                    </div>
+                    <div class="flex space-x-1.5">
+                        <a href="https://wa.me/918306559406?text=Hello%20Raj,%20I%20want%20personal%20reports" target="_blank" class="bg-whatsappGreen hover:bg-emerald-600 text-white text-[10px] font-bold px-2.5 py-1 rounded shadow transition flex items-center space-x-1">
+                            <i class="fa-brands fa-whatsapp"></i>
+                            <span>Join WhatsApp</span>
+                        </a>
+                    </div>
+                </div>
+                <p class="text-slate-300 text-[11px] leading-relaxed">
+                    🔥 <strong class="text-amber-400">Pitch & Session Update:</strong> API connected successfully! Live scores are updating below. For personal reports message on WhatsApp.
+                </p>
+            </div>
+
+            <!-- DYNAMIC API MATCHES CONTAINER -->
+            <div id="matches-container" class="space-y-3">
+                <div class="text-center py-6 text-slate-400 text-xs">
+                    <i class="fa-solid fa-spinner fa-spin mr-1"></i> Fetching live matches from API...
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= VIEW 2: SERIES & POINTS TABLE ================= -->
+        <div id="view-series" class="hidden space-y-3">
+            <div class="bg-crexCard border border-slate-800 rounded-lg p-3 space-y-3 shadow-md">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                    <h3 class="font-bold text-xs text-crexGreen uppercase tracking-wider">Tournament Points Table</h3>
+                    <span class="text-[10px] bg-slate-800 px-2 py-0.5 rounded text-slate-300 font-mono">Standings</span>
+                </div>
+                <p class="text-xs text-slate-400">Check official series details and standings on your CricketData dashboard.</p>
+            </div>
+        </div>
+
+        <!-- ================= VIEW 3: NEWS & TIPS ================= -->
+        <div id="view-news" class="hidden space-y-3">
+            <div class="bg-crexCard border border-slate-800 rounded-lg p-3 space-y-2">
+                <span class="text-[10px] text-amber-400 font-bold uppercase">Expert Analysis</span>
+                <h4 class="text-xs font-bold text-slate-100">Live Match Strategy & Tips</h4>
+                <p class="text-[11px] text-slate-400">Monitor live odds and session rates carefully during powerplays.</p>
+                <span class="text-[9px] text-slate-500 block pt-1">Raj Expert Desk</span>
+            </div>
+        </div>
+
+        <!-- ================= VIEW 4: MORE ================= -->
+        <div id="view-more" class="hidden space-y-2">
+            <div class="bg-crexCard border border-slate-800 rounded-lg p-3 text-center space-y-2">
+                <h4 class="font-bold text-xs text-slate-200">Raj App (RAJEX) Pro</h4>
+                <p class="text-[11px] text-slate-400">Powered by CricketData.org API & WhatsApp Personal Reports.</p>
+                <a href="https://wa.me/918306559406?text=Hello%20Raj,%20I%20want%20personal%20reports" target="_blank" class="inline-block bg-whatsappGreen text-white text-xs font-bold px-4 py-1.5 rounded shadow mt-2">
+                    <i class="fa-brands fa-whatsapp mr-1"></i> Join WhatsApp for Personal Reports
+                </a>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-crexCard border-t border-slate-800 py-2 px-4 flex justify-around items-center z-50 max-w-md mx-auto shadow-2xl">
+        <button onclick="switchTab('matches')" class="flex flex-col items-center text-crexGreen">
+            <i class="fa-solid fa-house text-sm"></i>
+            <span class="text-[9px] mt-1 font-bold">Home</span>
+        </button>
+        <button onclick="switchTab('matches');" class="flex flex-col items-center text-slate-400 hover:text-slate-200 transition">
+            <i class="fa-solid fa-bolt text-sm"></i>
+            <span class="text-[9px] mt-1 font-medium">Matches</span>
+        </button>
+        <a href="https://wa.me/918306559406?text=Hello%20Raj,%20I%20want%20personal%20reports" target="_blank" class="flex flex-col items-center text-whatsappGreen hover:text-emerald-400 transition">
+            <i class="fa-brands fa-whatsapp text-base"></i>
+            <span class="text-[9px] mt-1 font-bold">Reports</span>
+        </a>
+        <button onclick="switchTab('series')" class="flex flex-col items-center text-slate-400 hover:text-slate-200 transition">
+            <i class="fa-solid fa-trophy text-sm"></i>
+            <span class="text-[9px] mt-1 font-medium">Series</span>
+        </button>
+        <button onclick="switchTab('more')" class="flex flex-col items-center text-slate-400 hover:text-slate-200 transition">
+            <i class="fa-solid fa-bars text-sm"></i>
+            <span class="text-[9px] mt-1 font-medium">More</span>
+        </button>
+    </nav>
+
+    <!-- JavaScript with API Key & Cleaned Code -->
+    <script>
+        const API_KEY = 'F345f104-afe3-4432-ac4d-349e5d70dbd3'; 
+
+        async function fetchLiveMatches() {
+            const container = document.getElementById('matches-container');
+            container.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Fetching live scores...</div>`;
+
+            const url = `https://api.cricapi.com/v1/currentMatches?apikey=${API_KEY}&offset=0`;
+
+            try {
+                const response = await fetch(url);
+                const result = await response.json();
+
+                if (result.status === "success" && result.data && result.data.length > 0) {
+                    container.innerHTML = '';
+                    result.data.forEach(match => {
+                        let scoreText1 = match.score && match.score[0] ? `${match.score[0].r}/${match.score[0].w} (${match.score[0].o} Ov)` : 'Yet to bat';
+                        let scoreText2 = match.score && match.score[1] ? `${match.score[1].r}/${match.score[1].w} (${match.score[1].o} Ov)` : 'Yet to bat';
+
+                        const cardHTML = `
+                            <div class="match-card bg-crexCard border border-slate-800 rounded-lg shadow-md overflow-hidden hover:border-slate-700 transition">
+                                <div class="bg-slate-900/60 px-3 py-1.5 flex justify-between items-center text-[11px] border-b border-slate-800/80">
+                                    <span class="text-slate-300 font-medium truncate">${match.name}</span>
+                                    <span class="text-badgeRed font-bold flex items-center shrink-0 ml-2">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-badgeRed mr-1 animate-ping"></span> LIVE
+                                    </span>
+                                </div>
+                                <div class="p-3 space-y-2">
+                                    <div class="flex justify-between items-center text-xs">
+                                        <span class="font-bold text-slate-100">${match.teamInfo ? match.teamInfo[0].name : 'Team 1'}</span>
+                                        <span class="font-bold text-slate-100">${scoreText1}</span>
+                                    </div>
+                                    <div class="flex justify-between items-center text-xs">
+                                        <span class="font-medium text-slate-400">${match.teamInfo ? match.teamInfo[1].name : 'Team 2'}</span>
+                                        <span class="font-bold text-slate-400">${scoreText2}</span>
+                                    </div>
+                                </div>
+                                <div class="bg-slate-900/40 px-3 py-2 border-t border-slate-800/60 flex justify-between items-center text-[11px]">
+                                    <span class="text-crexGreen font-medium">${match.status}</span>
+                                    <span class="text-amber-400 font-mono font-semibold bg-amber-950/40 px-2 py-0.5 rounded border border-amber-900/30 text-[10px]">EXCHANGE</span>
+                                </div>
+                            </div>
+                        `;
+                        container.innerHTML += cardHTML;
+                    });
+                } else {
+                    container.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs">No live matches running right now or daily API limit reached.</div>`;
+                }
+            } catch (error) {
+                console.error("Error fetching scores:", error);
+                container.innerHTML = `<div class="text-center py-6 text-red-400 text-xs">Failed to load live scores. Check network connection.</div>`;
+            }
+        }
+
+        function switchTab(tabName) {
+            document.getElementById('view-matches').classList.add('hidden');
+            document.getElementById('view-series').classList.add('hidden');
+            document.getElementById('view-news').classList.add('hidden');
+            document.getElementById('view-more').classList.add('hidden');
+
+            ['matches', 'series', 'news', 'more'].forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                btn.classList.remove('text-crexGreen', 'border-b-2', 'border-crexGreen');
+                btn.classList.add('text-slate-400');
+            });
+
+            document.getElementById(`view-${tabName}`).classList.remove('hidden');
+            const activeTab = document.getElementById(`tab-${tabName}`);
+            activeTab.classList.remove('text-slate-400');
+            activeTab.classList.add('text-crexGreen', 'border-b-2', 'border-crexGreen');
+        }
+    </script>
+
+</body>
+</html>
