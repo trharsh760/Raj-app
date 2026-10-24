@@ -1,0 +1,15 @@
+{
+  "name": "Raj App - Live Cricket Exchange",
+  "short_name": "RAJEX",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#131a24",
+  "theme_color": "#00b055",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/1165/1165187.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
